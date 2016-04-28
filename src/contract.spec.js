@@ -10,8 +10,9 @@
 
 var should = require('should');
 var __ = require('underscore');
-var c = require('./contract.face');
+var c = require('./contract');
 var fs = require('fs');
+var errors = require('./errors');
 
 Array.prototype.toString = function () {
   return "[" + this.join(", ") + "]";
@@ -30,7 +31,7 @@ should.Assertion.prototype.throwError = function (message) {
 };
 
 should.Assertion.prototype.throwContract = function (message) {
-  this.throwType(c.ContractError, message);
+  this.throwType(errors.ContractError, message);
 };
 
 should.Assertion.prototype.throwType = function(type, message){
@@ -223,12 +224,18 @@ describe ("object", function () {
   it ("fails missing field", function () { (function () { c.object({x: c.value(5), y:c.value(10)}).check({ x: 5, z: 10}); }).should.throwContract(); });
   it ("fails missing field, nested", function () { (function () { c.object({x: c.object({y: c.value(5)})}).check({x: { z: 10}}); }).should.throwContract(); });
 
-  it ("optional field missing", function () { c.object({x: c.value(5), y:c.optional(c.value(10))}).check({x: 5}).should.ok; });
-  it ("optional field, passing", function () { c.object({x: c.value(5), y:c.optional(c.value(10))}).check({x: 5, y:10}).should.ok; });
-  it ("optional field, failing", function () { (function () { c.object({x: c.value(5), y:c.optional(c.value(10))}).check({ x: 5, y:5}); }).should.throwContract(); });
-  it ("optional field, nested, failing", function () { (function () { c.object({x: c.value(5), y: c.optional(c.object({z: c.value(10)}))})
-                                                                      .check({x: 5, y:{z: 0}}); })
-                                                       .should.throwContract(); });
+  describe ("option field", function () {
+    it ("when missing", function () { c.object({x: c.value(5), y:c.optional(c.value(10))}).check({x: 5}).should.ok; });
+    it ("when null", function () { c.object({x: c.value(5), y:c.optional(c.value(10))}).check({x: 5, y: null}).should.ok; });
+    it ("when undefined", function () { c.object({x: c.value(5), y:c.optional(c.value(10))}).check({x: 5, y: undefined}).should.ok; });
+    it ("when present", function () { c.object({x: c.value(5), y:c.optional(c.value(10))}).check({x: 5, y:10}).should.ok; });
+    it ("rejects when mismatched", function () { (function () { c.object({x: c.value(5), y:c.optional(c.value(10))}).check({ x: 5, y:5}); }).should.throwContract(); });
+    it ("rejects when falsy", function () { (function () { c.object({x: c.value(5), y:c.optional(c.value(10))}).check({ x: 5, y:""}); }).should.throwContract(); });
+    it ("rejects when NaN", function () { (function () { c.object({x: c.value(5), y:c.optional(c.value(10))}).check({ x: 5, y:0/0}); }).should.throwContract(); });
+    it ("nested and mismatched", function () { (function () { c.object({x: c.value(5), y: c.optional(c.object({z: c.value(10)}))})
+                                                              .check({x: 5, y:{z: 0}}); })
+                                               .should.throwContract(); });
+  });
 
   it ("extra fields, passing", function () { c.object({x: c.value(5)}).check({x:5, y:10}).should.eql({x:5, y:10}); });
   it ("extra fields, wrapping", function () { c.object({fn: c.fn()}).wrap({fn: function () {}, x: 5}).x.should.eql(5); });
@@ -265,6 +272,18 @@ describe ("strict", function () {
   it ("fails an object, multiple", function () { (function () { c.object({x: c.value(10)}).strict().check({x: 10, y:20, z:30}); }).should.throwContract(); });
   it ("fails a nested object", function () { (function () { c.object({x: c.object({y: c.value(10)}).strict() }).strict().check({x: {y: 10, z: 20}}); }).should.throwContract(); });
   it ("fails a tuple", function () { (function () { c.tuple(c.value(10)).strict().check([10, 20]); }).should.throwContract(); });
+
+  it ("composes with extend", function () {
+    (function () { c.object({x: c.number}).strict().extend({y: c.number}).check({x: 5}); }).should.throwContract(/required/);
+    (function () { c.object({x: c.number}).strict().extend({y: c.number}).check({x: 5, y: 'asd'}); }).should.throwContract();
+    (function () { c.object({x: c.number}).strict().extend({y: c.number}).check({x: 5, y: 6}); }).should.ok;
+    (function () { c.object({x: c.number}).strict().extend({y: c.number}).check({x: 5, y: 6, z: 7}); }).should.throwContract(/extra field/);
+
+    (function () { c.object({x: c.number}).extend({y: c.number}).strict().check({x: 5}); }).should.throwContract(/required/);
+    (function () { c.object({x: c.number}).extend({y: c.number}).strict().check({x: 5, y: 'asd'}); }).should.throwContract();
+    (function () { c.object({x: c.number}).extend({y: c.number}).strict().check({x: 5, y: 6}); }).should.ok;
+    (function () { c.object({x: c.number}).extend({y: c.number}).strict().check({x: 5, y: 6, z: 7}); }).should.throwContract(/extra field/);
+  });
 });
 
 
@@ -325,7 +344,7 @@ describe ("constructs", function () {
       c.fun().constructs({
         inc: c.fun({i: c.number}),
         _dec: c.fun({i: c.number})
-      }).wrap(function Blank() {});}).should.throwType(c.privates.ContractLibraryError, /are missing[\s\S]+inc, _dec/);
+      }).wrap(function Blank() {});}).should.throwType(errors.ContractLibraryError, /are missing[\s\S]+inc, _dec/);
   });
 
   it ("supports returning explicitly", function () {
@@ -381,14 +400,25 @@ describe ("constructs", function () {
       instance._dec(3);
       instance.x.should.eql(7);
     });
-
+    it ("check `isA` for the `this` argument", function () {
+      var instance = new SubExample(10);
+      var incFn = instance.inc;
+      (function () { incFn(20); }).should.throwContract(/isA\(ExampleImpl\)[\s\S]+the `this` argument/);
+      (function () { incFn.call(new SubExample(5), 2, 4); }).should.ok;
+      (function () { incFn.call({}, 2); }).should.throwContract(/the `this` argument/);
+    });
+    it ("`isA` checks on subclass refuses superclass", function () {
+      var instance = new SubExample(10);
+      var pairFn = instance.pair;
+      (function () { pairFn.call(new Example(5)); }).should.throwContract(/isA\(SubExampleImpl\)[\s\S]+`this`/);
+    });
   });
 
   describe('when nested inside other contracts', function () {
     var theContract = c.fun({x: c.object({
       BuildIt: c.fn().constructs({
         inc: c.fun({i: c.any}).returns(c.number)
-      }).returns(c.object())        
+      }).returns(c.object())
     })}, {v: c.any});
 
     var theFunction = function (x, v) {
@@ -404,7 +434,7 @@ describe ("constructs", function () {
     };
 
     var theObject = {BuildIt: TheConstructor};
-    
+
     it ('produces a usable object', function () {
       wrapped(theObject, 10).should.be.eql(11);
     });
@@ -412,17 +442,17 @@ describe ("constructs", function () {
     it ('detects misuses', function () {
       (function () { wrapped(theObject, "ten"); }).should.throwContract(/inc[\s\S]+return value of the call/);
     });
-    
+
     it ('produces a short stack context on prototype function calls', function () {
       try {
-        wrapped(theObject, "ten");        
+        wrapped(theObject, "ten");
       } catch (e) {
         e.message.should.not.match(/at position/);
       }
     });
     it ('the truncated context retains the original wrap location', function () {
-      var index = 
-          __.findIndex(fs.readFileSync('./contract.spec.js').toString().split('\n'),
+      var index =
+          __.findIndex(fs.readFileSync('./src/contract.spec.js').toString().split('\n'),
                        function (line) { return line.match(/theContract.wrap\(theFunction\)/); });
       var expected = new RegExp('contract was wrapped at: .*/contract.spec.js:'+(index+1));
       (function () { wrapped(theObject, "ten"); }).should.throwContract(expected);

@@ -7,8 +7,11 @@
 
 /*jshint eqeqeq:true, bitwise:true, forin:true, immed:true, latedef:true, newcap:true, undef:true, strict:false, node:true */
 
-var __ = require('underscore'); // '__' because node's repl already binds '_'
+var _ = require('underscore');
 var c = require('./contract.impl');
+var errors = require('./errors');
+
+_.extend(c, require('./function-contracts.js'));
 
 var thisModuleName = 'Contracts';
 
@@ -213,7 +216,7 @@ var contracts = {
     .doc("Accepts any function. To put contract on the argument and return",
          "value, use `fn`, `fun`, or `method`."),
 
-  isA: c.fun({parent: c.any}).returns(contractObject)
+  isA: c.fun({parent: c.anyFunction}).returns(contractObject)
     .doc("Accepts only values `v` for which `v instanceof parent` returns true."),
 
   contract: c.contract
@@ -415,5 +418,5 @@ module.exports = c.publish(thisModuleName, c, contracts,
                              tupleContractObject: tupleContractObject,
                              objectContractObject: objectContractObject,
                              Contract: c.Contract,
-                             ContractError: c.ContractError
+                             ContractError: errors.ContractError
                            });

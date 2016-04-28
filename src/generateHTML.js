@@ -10,7 +10,7 @@
 var __ = require('underscore');
 var fs = require('fs');
 var m = require("mustache");
-var c = require('./contract.face');
+var c = require('./contract');
 var marked = require('marked');
 
 var moduleTemplateData = {
@@ -136,7 +136,7 @@ function renderModule(name) {
 }
 
 function generateHTML() {
-  fs.readFile('module.mustache', 'ascii', function(err, template) {
+  fs.readFile('resources/module.mustache', 'ascii', function(err, template) {
     if (err) {
       console.error("Could not open file: %s", err);
       process.exit(1);

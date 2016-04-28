@@ -17,6 +17,7 @@ Racket-style Higher-Order Contracts in Plain JavaScript
 [Blame, Blame-correctness, and Blame Tracking](#blame)  
 [Contracts on Functions-as-Values](#functions-as-values)  
 [Tutorial](#tutorial)  
+[Additional Documentation](#tutorial)__
 [Basic Value Contracts](#basic-value)  
 [Storing Custom Contracts](#storing)  
 [Data Structure Contracts](#data-structure)  
@@ -244,10 +245,12 @@ for the `dx` argument of the call.
 <a name="tutorial"/>
 ## Tutorial
 
+### Additional Documentation
+
 *In a delightful instance of self-reference, the contract library is documented
  and checked using the contract library itself. If reading tutorials is not your thing,
  you may want to instead look at the contracts placed on `rho-contracts.js`'s functions
- and methods by reading [`contract.face.js`](https://github.com/sefaira/rho-contracts.js/blob/master/contract.face.js) directly.*
+ and methods by reading [`contract.js`](https://github.com/sefaira/rho-contracts.js/blob/master/src/contract.js) directly.*
 
 The contract library is typically `require`'d and bound to a variable called `c`:
 
@@ -356,8 +359,8 @@ Another option is to make a clone of the contract library at the top of
 your node module and keep the contracts created and used in that module in the clone:
 
 ```javascript
-> var __ = require('underscore')
-> var c = __.clone(require('rho-contracts'));
+> var _ = require('underscore')
+> var c = _.clone(require('rho-contracts'));
 > c.numberAsString = c.matches(/^[0-9]+(\.[0-9]+)?$/)
 > c.or(c.falsy, c.numberAsString).check(null)     // ok, null is falsy
 null
@@ -836,7 +839,8 @@ cc.kidPark = toContract({
 
 
 <a name="constructors"/>
-### Contracts on Prototypes and Constructors
+
+### Contracts on Prototypes and Constructors ###
 
 To check functions that are intended to be invoked with `new`, aka
 "constructor" functions, use the `constructs` method on function
@@ -875,11 +879,17 @@ receiving methods from its prototype and so forth) also works as
 expected.
 
 The argument to `constructs` specifies the contracts on the
-`prototype` of the function. `constructs` is not strict, in the
-sense that additional fields on the constructor's `prototype`, but not
-present in the contract, will appear on the constructed objects'
-prototype without checks nor wrapping. This means that
-private methods and fields can be omitted from the contract.
+`prototype` of the function. Unless a different `thisArg` has been set
+on the contract, `constructs` threats these functions as methods of
+class, meaning that it checks that the `this` argument is always bound
+to an instance of the constructor. For example, `instance.inc.call({x:
+5}, 1)` fails since `{x: 5}` is not `instanceof Counter`.
+
+`constructs` is not strict, in the sense that additional fields on the
+constructor's `prototype`, but not present in the contract, will
+appear on the constructed objects' prototype without checks nor
+wrapping. This means that private methods and fields can be omitted
+from the contract.
 
 Note that that contract-checking shells introduced by rho-contracts
 disturb usages of the `constructor` property. Since the `constructor`
@@ -930,34 +940,38 @@ The `constructs` method shown above avoids both these problems.
 
 
 <a name="undocumented"/>
-### Undocumented Functionality
 
-Additional functionality that's not documented yet:
+## Functionality in Contract.js ##
 
-- c.pred
-- forwardRef/setRef
-- Contracts on Whole Modules, `publish()`
+Read about these functions in [`contract.js`](https://github.com/sefaira/rho-contracts.js/blob/master/src/contract.js) directly.
 
-- The partially documented documentation feature:
-- .doc
-- .theDoc
-- documentType
-- documentTable
-- document category
-- document module
+- `c.pred`: construct custom contracts from predicates.
+- `c.forwardRef` and `c.setRef`: the sibblings of `c.cylic`.
+- `publish()`: contracts on whole modules which seals private methods
+- `c.setErrorMessageInspectionDepth`: setting the depth of the data
+  printed in the error messages, which defaults to 5-plys deep.
+- `c.fn()`: a shorter notation for function contracts the omits argument names.
+- `anyFunction`: a contract that accepts any function without wrapping.
+- `isA`: a contract that accepts values that pass an `instanceof` check.
+
+- The documentation feature is best learned by following the example
+  set by [`contract.js`](https://github.com/sefaira/rho-contracts.js/blob/master/src/contract.js):
+- `.doc`
+- `.theDoc`
+- `documentType`
+- `documentTable`
+- `document category`
+- `document module`
 
 And also
 
-- anyFunction
-- isA
-- quacksLike
-- silentAnd
-- `c.fn()`
-- setErrorMessageInspectionDepth
+- `quacksLike`
+- `silentAnd`
 
 
 <a name="related"/>
-### Related Work
+
+## Related Work ##
 
 - `rho-contracts.js` is an implementation of the paper [*Contracts for higher-order
 functions*](http://dl.acm.org/citation.cfm?id=581484), by Findler and Felleisen,
@@ -995,7 +1009,8 @@ ICFP 2002.
 
 
 <a name="license"/>
-### License
+
+## License ##
 
 This library was created at Sefaira.com, originally for internal use. We are
 releasing it to the open source community under the Mozilla open-source license
