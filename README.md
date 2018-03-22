@@ -307,8 +307,8 @@ contracts, such as `c.oneOf()` which returns a contract that only accepts the va
 ContractError: Expected oneOf(y, yes, n, no), but got 'bunny'
 ```
 
-On particularly powerful contract is `c.or()`, which is a contract that takes
-two or more contracts as argument, and returns a contract that accept a value if
+One particularly powerful contract is `c.or()`, which is a contract that takes
+two or more contracts as argument, and returns a contract that accepts a value if
 it passes any one of the given contracts:
 
 ```javascript
@@ -411,7 +411,7 @@ The full value being checked was:
 ContractError: Expected tuple of size 2, but got [ 10 ]
 ```
 
-A `c.hash()` contract checks that all right-hand values of a hash table passes the
+A `c.hash()` contract checks that all right-hand values of a hash table pass the
 given contract:
 
 ```javascript
@@ -464,8 +464,8 @@ Each argument's contract is specified in the call to `c.fun()` using a hash
 table containing exactly one field. The name of that field is used by
 `rho-contracts.js`'s error messages when the argument's check
 fails. Note that the name of the argument in the contract can be different from the name
-of the argument in the implementation. This is sometime useful -- at time
-the implementation might want to uses a short name internally, yet still prefer to
+of the argument in the implementation. This is sometimes useful -- at times,
+the implementation might want to use a short name internally, yet still prefer to
 give users a long-form variable name in the error messages:
 
 ```javascript
@@ -510,10 +510,10 @@ contracts:
   arguments, so long as they are all numbers. Generally, the contract passed to
   `.extraArgs()` will be matched against an array containing the extra arguments
   beyond those specified explicitly. This opens the possibility of checking
-  overloaded function and other rich combinations of extra arguments by using
+  overloaded functions and other rich combinations of extra arguments by using
   `c.or()` contract along with `c.tuple()` contracts.
 
-Like all other methods on contract, these thwo methods, `.returns()`
+Like all other methods on contract, these two methods, `.returns()`
 and `.extraArgs()` do not modify the original contract. Instead they
 return a new contract which checks everything the original contract checks, plus
 their additional check. They are used like this:
@@ -559,10 +559,10 @@ for this `this` argument of the call.
 <a name="optargs"/>
 ### Contracts for Optional Arguments
 
-Contracts can be marked optional using `c.optional()` When used for a function's
-argument, a contract that has been marked optional makes that argument optional
+Contracts can be marked as optional using `c.optional()` When used for a function's
+argument, a contract that has been marked as optional makes that argument optional
 (the contract itself is not affected otherwise). All arguments to the right of an optional
-argument must be optional as well.
+argument for a function call must be optional as well.
 
 ```javascript
 > var c = require('rho-contracts')
@@ -654,7 +654,7 @@ DEBUG: NaN
 DEBUG: NaN
 ```
 
-The `.wrap()` method wraps recursively all JavaScript's data structures, array,
+The `.wrap()` method wraps recursively all JavaScript's data structures, arrays,
 hashes, tuples, and objects.
 
 
@@ -880,7 +880,7 @@ expected.
 
 The argument to `constructs` specifies the contracts on the
 `prototype` of the function. Unless a different `thisArg` has been set
-on the contract, `constructs` threats these functions as methods of
+on the contract, `constructs` treats these functions as methods of
 class, meaning that it checks that the `this` argument is always bound
 to an instance of the constructor. For example, `instance.inc.call({x:
 5}, 1)` fails since `{x: 5}` is not `instanceof Counter`.
@@ -933,7 +933,7 @@ However, this usage has two downsides:
 * Second, the common pattern of placing methods on the prototype in
   order to share them across instances fails to achieve the intended
   memory savings since every newly constructed instance receives a
-  contract-checking shells for the methods present on the prototype.
+  contract-checking shell for the methods present on the prototype.
 
 The `constructs` method shown above avoids both these problems.
 
@@ -946,11 +946,11 @@ The `constructs` method shown above avoids both these problems.
 Read about these functions in [`contract.js`](https://github.com/sefaira/rho-contracts.js/blob/master/src/contract.js) directly.
 
 - `c.pred`: construct custom contracts from predicates.
-- `c.forwardRef` and `c.setRef`: the sibblings of `c.cylic`.
-- `publish()`: contracts on whole modules which seals private methods
+- `c.forwardRef` and `c.setRef`: the siblings of `c.cylic`.
+- `publish()`: contracts on whole modules which seal private methods
 - `c.setErrorMessageInspectionDepth`: setting the depth of the data
   printed in the error messages, which defaults to 5-plys deep.
-- `c.fn()`: a shorter notation for function contracts the omits argument names.
+- `c.fn()`: a shorter notation for function contracts that omits argument names.
 - `anyFunction`: a contract that accepts any function without wrapping.
 - `isA`: a contract that accepts values that pass an `instanceof` check.
 
@@ -992,8 +992,8 @@ ICFP 2002.
   implements a run-time checker for types written in Haskell syntax inside of
   specification strings. It suffers from the troubles of externally embedded
   languages, namely that it exists separate from its host language. It support only
-  a limited number of basic type (Int, Num, String, Bool, Object, Array) with no
-  possibility of extensions that's available and its type namespace is separate
+  a limited number of basic types (Int, Num, String, Bool, Object, Array) with no
+  possibility of extensions that are available and its type namespace is separate
   from the JavaScript namespace and module machinery.
 
 
@@ -1003,8 +1003,6 @@ ICFP 2002.
   roots, they require lots of code for little benefit, in particular, they cannot
   check higher-order functions, cannot separate specification from
   implementation. See Findler and Felleisen for a more thorough comparison.
-
-
 
 
 
