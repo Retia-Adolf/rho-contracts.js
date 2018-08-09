@@ -10,34 +10,32 @@ rho-contracts.js
 Racket-style Higher-Order Contracts in Plain JavaScript
 
 ## Table of Content
-[Installation](#installation)  
-[Introduction](#introduction)  
-[Run-time vs Compile-time](#runtime)  
-[Higher-order contracts](#higher-order)  
-[Blame, Blame-correctness, and Blame Tracking](#blame)  
-[Contracts on Functions-as-Values](#functions-as-values)  
-[Tutorial](#tutorial)  
-[Additional Documentation](#tutorial)__
-[Basic Value Contracts](#basic-value)  
-[Storing Custom Contracts](#storing)  
-[Data Structure Contracts](#data-structure)  
-[Contracts on Functions](#functions)  
-[Contracts for Optional Arguments](#optargs)  
-[Wrapping vs Checking](#wrap-vs-check)  
-[Object Contracts](#objects)  
-[A Lightweight Notation](#lightweight)  
-[Contracts on Prototypes and Constructors](#constructors)  
-[Undocumented Functionality](#undocumented)  
-[Related Work](#related)  
-[License](#license)  
+- [Installation](#installation)  
+- [Introduction](#introduction)  
+    - [Run-time vs Compile-time](#run-time-vs-compile-time)  
+    - [Higher-order contracts](#higher-order-contracts)  
+    - [Blame, Blame-correctness, and Blame Tracking](#blame-blame-correctness-and-blame-tracking)  
+    - [Contracts on Functions-as-Values](#contracts-on-functions-as-values)  
+- [Tutorial](#tutorial)  
+    - _[Additional Documentation](#additional-documentation)_  
+    - [Basic Value Contracts](#basic-value-contracts)  
+    - [Storing Custom Contracts](#storing-custom-contracts)  
+    - [Data Structure Contracts](#data-structure-contracts)  
+    - [Contracts on Functions](#contracts-on-functions)  
+    - [Contracts for Optional Arguments](#contracts-for-optional-arguments)  
+    - [Wrapping vs Checking](#wrapping-vs-checking)  
+    - [Object Contracts](#object-contracts)  
+    - [A Lightweight Notation](#a-lightweight-notation)  
+    - [Contracts on Prototypes and Constructors](#contracts-on-prototypes-and-constructors)  
+- [Undocumented Functionality](#functionality-in-contractjs)  
+- [Related Work](#related-work)  
+- [License](#license)  
 
 
-<a name="installation"/>
 ## Installation
 
 `npm install rho-contracts`
 
-<a name="introduction"/>
 ## Introduction
 
 *(scroll down to* Tutorial *to skip the intro)*
@@ -63,7 +61,6 @@ into everything else, and its habit turning anything into a `null` at a moment's
 notice. When I couldn't stand it anymore, I wrote this contract library.
 
 
-<a name="runtime"/>
 ### Run-time vs Compile-time
 
 `rho-contracts.js` is purely a run-time checker. It will never give a compile-time
@@ -72,7 +69,7 @@ where the assertions are written in a style similar to that of a static type
 system, and whose checking discipline is sufficiently strict to provide similar
 guarantees as a type system (though not the same.)
 
-<a name="higher-order"/>
+
 ### Higher-order contracts
 
 `rho-contracts.js` is an *higher-order* contract library, as opposed to
@@ -169,7 +166,6 @@ exactly line where the error is, rather than some line deep inside the
 implementation of `derive`.
 
 
-<a name="blame"/>
 ### Blame, Blame-correctness, and Blame Tracking
 
 In the last example, when `fn` fails to return a number, which code is
@@ -199,7 +195,6 @@ system it was not possible to implement the report of blame in term of the name
 of the module interacting. `rho-contracts.js` only reports the function names.
 
 
-<a name="functions-as-values"/>
 ### Contracts on Functions-as-Values
 
 `rho-contracts.js`'s higher-order contracts can also be used to check the correctness
@@ -242,7 +237,6 @@ Expected number, but got 'left'
 for the `dx` argument of the call.
 ```
 
-<a name="tutorial"/>
 ## Tutorial
 
 ### Additional Documentation
@@ -258,7 +252,7 @@ The contract library is typically `require`'d and bound to a variable called `c`
 c = require('rho-contracts')
 ```
 
-<a name="basic-value"/>
+
 ### Basic Value Contracts
 
 Some fields of `c` are contract objects you can use directly, such as the
@@ -330,7 +324,6 @@ heterogeneous functions that are common in idiomatic JavaScript, but that would
 be refused outright by most static type systems (that is so awesome.)
 
 
-<a name="storing"/>
 ### Storing Custom Contracts
 
 The contract library provides a rich collection of contract function to
@@ -379,7 +372,6 @@ ContractError: Expected numberAsString, but got 'o_0.'
 ```
 
 
-<a name="data-structure"/>
 ### Data Structure Contracts
 
 A `c.array()` contract checks that all items in the array passes the given
@@ -422,7 +414,7 @@ The full value being checked was:
 { a: true, b: true, c: false, d: null, e: false }
 ```
 
-<a name="functions"/>
+
 ### Contracts on Functions
 
 Contract on functions are implemented by wrapping the implementing
@@ -555,8 +547,6 @@ for this `this` argument of the call.
 ```
 
 
-
-<a name="optargs"/>
 ### Contracts for Optional Arguments
 
 Contracts can be marked as optional using `c.optional()` When used for a function's
@@ -582,8 +572,6 @@ ContractError: Too many arguments, expected at most 1 but got 2
 ```
 
 
-
-<a name="wrap-vs-check"/>
 ### Wrapping vs Checking
 
 Recall, we cannot tell if a function will be miscalled until it is called, and
@@ -658,8 +646,6 @@ The `.wrap()` method wraps recursively all JavaScript's data structures, arrays,
 hashes, tuples, and objects.
 
 
-
-<a name="objects"/>
 ### Object Contracts
 
 Since objects in JavaScript are constructed out of normal hash tables containing
@@ -808,8 +794,6 @@ ContractError: Field `carModel` required, got { trunkSize: 9.8 }
 - .strict on tuples
 
 
-
-<a name="lightweight"/>
 ### A Lightweight Notation ###
 
 All `rho-contracts.js` functions will automatically promote simple values
@@ -837,8 +821,6 @@ cc.kidPark = toContract({
 
 ```
 
-
-<a name="constructors"/>
 
 ### Contracts on Prototypes and Constructors ###
 
@@ -939,7 +921,6 @@ The `constructs` method shown above avoids both these problems.
 
 
 
-<a name="undocumented"/>
 
 ## Functionality in Contract.js ##
 
@@ -969,7 +950,6 @@ And also
 - `silentAnd`
 
 
-<a name="related"/>
 
 ## Related Work ##
 
@@ -1006,7 +986,6 @@ ICFP 2002.
 
 
 
-<a name="license"/>
 
 ## License ##
 
